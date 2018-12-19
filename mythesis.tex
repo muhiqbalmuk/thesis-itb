@@ -1,0 +1,119 @@
+% This is the main file of your thesis. Preambles, necessary command, etc goes here
+% File utama tesis. Command penting, pembuka, dll ditaruh disini
+% IT IS IMPORTANT TO PUT THIS FILE IN THE SAME DIRECTORY AS thesisitb.sty
+% PENTING! TARUH FILE INI PADA DIREKTORI YANG SAMA DENGAN thesisitb.sty
+% By: MF/13612020/23616034 & MI/13612038/23616033
+% Credits: LaTeX inventor, SPS thesis guide, Google, and tex.stackexchange
+% Terima kasih kepada: yang bikin LaTeX, panduan tesis SPS, Google, dan tex.stackexchange
+
+\documentclass[12pt,english]{report}
+\usepackage{thesisitb}
+
+% Reducing spacing bw header and chapter title
+% Mengurangi spasi antara batas atas kertas dengan judul bab
+\makeatletter
+\def\@makechapterhead#1{%
+  %%%%\vspace*{50\p@}% %%% removed!
+  {\parindent \z@ \centering \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+        \huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\def\@makeschapterhead#1{%
+  %%%%%\vspace*{50\p@}% %%% removed!
+  {\parindent \z@ \centering
+    \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries  #1\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+\begin{document}
+\clearpage
+
+\input{misc/title} % Title page / Judul
+\pagenumbering{roman} % Use roman numbering style / Gunakan penomoran halaman gaya romawi
+
+% English abstract page. Write your English abstract in misc/abstrak_eng.tex
+% Halaman abstrak. Tulis di misc/abstrak_eng.tex
+\chapter*{\centering Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\input{misc/abstrak_eng}
+
+% Legalisation page. Write your legalisation in misc/leg_page.tex
+\chapter*{\centering Legalisation Page}
+\addcontentsline{toc}{chapter}{Legalisation Page}
+\input{misc/leg_page}
+
+%\chapter*{\centering Abstrak}
+%\addcontentsline{toc}{chapter}{Abstract (Indonesian)}
+%\input{misc/abstrak_indon}
+
+% Preface chapter. Write your preface in misc/preface.tex
+\chapter*{\centering Thesis User Guide}
+\addcontentsline{toc}{chapter}{Thesis User Guide}
+\input{misc/preface}
+
+% Acknowledgement page. Write your acknowledgement page in misc/kata_pengantar.tex
+\chapter*{\centering Acknowledgement}
+\addcontentsline{toc}{chapter}{Acknowledgement}
+\input{misc/kata_pengantar}
+
+% Quotation page. In case you want to go sentimental
+\chapter*{}
+\addcontentsline{toc}{chapter}{Prologue}
+\input{misc/quote} 
+
+% Table of Contents. This should be printed automatically. Make sure you compile it twice in your LaTeX editor.
+\pdfbookmark{\contentsname}{List of Contents}
+
+\tableofcontents
+
+% Print your list of figures. Also printed automatically.
+\listoffigures
+
+% Print your list of tables. Also printed automatically.
+\listoftables
+
+%\chapter*{List of Symbols}
+%\addcontentsline{toc}{chapter}{List of Symbols}
+%\input{misc/listSymbols}
+
+\newpage
+\pagenumbering{arabic}
+
+% Below this line is the main body of your thesis. Add and/or omit chapters as necessary
+% Introduction chapter. Write your introduction in chapters/bab1.tex
+\chapter{Introduction}
+\input{chapters/bab1}
+
+% Fundamental theory chapter. Write your fundamental theoreties in chapters/bab2.tex
+\chapter{Fundamental Theories}
+\input{chapters/bab2}
+
+% Detail of your thesis. This should be where you describe your work e.g code setup, experimental setup, design process, etc. Write it in chapters/bab3.tex
+\chapter{Experimental System Design and Setup}
+\input{chapters/bab3}
+
+% This should be where you put your result and your analysis. Write it in chapters/bab4.tex
+\chapter{Results and Analysis}
+\input{chapters/bab4}
+
+% This is where to put your conclusions and possible future works. Write it in chapters/bab5.tex
+\chapter{Conclusion and Future Works}
+\input{chapters/bab5}
+
+% Bibliography. It should be printed automatically. Make sure to run bibtex on mythesis.aux and recompile mythesis.tex
+\printbibliography[heading=bibintoc,title=References]
+
+% This is the appendix part. Put your pseudocode and the like here.
+\chapter*{Appendix}
+\addcontentsline{toc}{chapter}{Appendix}
+\input{misc/lampiran}
+
+\end{document}

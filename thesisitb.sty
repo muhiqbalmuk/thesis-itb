@@ -1,0 +1,119 @@
+% Style file for ITB master thesis.
+% IT IS IMPORTANT TO PUT THIS FILE IN THE SAME DIRECTORY AS mythesis.tex
+%
+% By : MI/13612038/23616033
+% Modified by: you :)
+%
+% Feel free to download, use, modify, or tinker with this file
+%
+% TODO
+% 1. Upload it maybe (?)
+% 
+%
+% Have fun! ;)
+\ProvidesPackage{thesisitb}
+
+% SUPPORTING PACKAGES
+\special{papersize=210mm,297mm}
+% Paper size and margins
+\RequirePackage{geometry}
+\geometry{left=40mm, right=30mm, top=30mm, bottom=30mm}
+
+% Support UTF-8
+\RequirePackage[utf8]{inputenc}
+
+% T1 output encoding
+\RequirePackage[T1]{fontenc}
+
+% Language package
+% Change english to bahasa for Indonesian language document
+\RequirePackage[english]{babel}
+
+% Handling graphics and colours
+\RequirePackage{graphicx}
+
+% Costumization of listings
+\RequirePackage{enumitem}
+
+% Enabling multi file editing
+\RequirePackage{subfiles}
+
+% Title sectioning in Table of Contents
+\RequirePackage{titletoc}
+
+% Upright Greek letters
+\RequirePackage{upgreek}
+
+% Place float precisely in your code
+\RequirePackage{float}
+\floatstyle{plaintop} % To make sure the caption of table is placed on top of the table
+\restylefloat{table}
+
+% Supporting mathematical environments e.g equation, theorems, proof, etc.
+\RequirePackage{amsthm,amsmath,amssymb}
+
+% Provides hyperlink for easier cross-referencing
+\RequirePackage[bookmarks=true]{hyperref}
+
+% Newer bookmark organisation for hyperref package
+\RequirePackage{bookmark}
+
+% Add bibliography, index, and contents in Table of Contents
+\RequirePackage{tocbibind}
+
+% Double line spacing
+\RequirePackage{setspace}
+
+% Provides environment for code listing
+\RequirePackage{listings}
+
+% Providing more colours for document
+\RequirePackage{xcolor}
+
+% Environment for your quote page, if you have any.
+\RequirePackage{epigraph}
+
+% For merging and splitting table cells
+\RequirePackage{multirow}
+
+% Newer fonts
+%\RequirePackage{txfonts}
+
+\RequirePackage{xpatch}
+\xpatchcmd{\@makeschapterhead}{%
+  \Huge \bfseries  #1\par\nobreak%
+}{%
+  \Huge \bfseries\centering #1\par\nobreak%
+}{\typeout{Patched makeschapterhead}}{\typeout{patching of @makeschapterhead failed}}
+
+
+\xpatchcmd{\@makechapterhead}{%
+  \huge\bfseries \@chapapp\space \thechapter
+}{%
+  \huge\bfseries\centering \@chapapp\space \thechapter
+}{\typeout{Patched @makechapterhead}}{\typeout{Patching of @makechapterhead failed}}
+
+
+
+% References
+\usepackage[backend=bibtex,style=authoryear-icomp,natbib=true]{biblatex}
+% Select the bibliography file
+\addbibresource{daftarpustaka.bib}
+\renewcommand*{\nameyeardelim}{\addcomma\space} % to add comma between author and year
+\nocite{*}
+
+\setlength{\parindent}{0 em} % paragraph indentation
+\setlength{\parskip}{1 em} % paragraph spacing
+\renewcommand{\baselinestretch}{1.25} % line spacing
+
+% Graphics path. Put your images in images directory
+\graphicspath{ {images/} }
+\graphicspath{{images/}{../images/}}
+\date{}
+
+\newlength\longest
+\addto\captionsenglish{
+	\renewcommand{\bibname}{References}
+}
+
+\renewcommand{\thechapter}{\Roman{chapter}}
