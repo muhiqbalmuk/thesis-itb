@@ -1,0 +1,208 @@
+\lstset{
+    language=Matlab,%
+    basicstyle=\ttfamily,
+    breaklines=true,%
+    keywordstyle=\color{blue},%
+    identifierstyle=\color{black},%
+    stringstyle=\color{yellow},
+    commentstyle=\color{green},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+    %emph=[2]{word1,word2}, emphstyle=[2]{style},    
+}
+\begin{lstlisting}[caption={Pseudocode for main DAQ Code in MATLAB}]
+clc
+clear all
+close all
+
+%% INITIALISING
+b = 0.0018;
+m = 6.92;
+
+ai = daq.createSession('ni');
+addAnalogInputChannel(ai,'Dev2', 'ai0', 'Voltage');
+ai.Rate = 500;
+
+disp('Calculating zero load balance...');
+
+[data,time] = ai.startForeground;
+
+zerobal = mean(data);
+
+disp('Begin the flapping motion in Arduino!')
+pause(8);
+
+%% DATA COLLECTING
+disp('Collecting data...');
+
+ai.DurationInSeconds = 13;
+
+[volt,time] = ai.startForeground;
+
+volt = (volt - zerobal)*1E3;
+forceNormal = (volt - b)/m*9.81*1E-3;
+
+%% FILTERING & SMOOTHING
+% Filter design using 4th order Butterworth filter 
+n = 4;
+cutoffFreq = 2;
+wn = 2*cutoffFreq/ai.Rate;
+[z,p] = butter(n,wn);
+
+% Actual filtering process
+filterVolt = filter(z,p,volt);
+filterforceNormal = filter(z,p,forceNormal);
+
+% Smoothing process using moving average method up to 100 pts forward
+smoothforceNormal = smooth(filterforceNormal,500,'moving');
+forceAverage = mean(smoothforceNormal);
+
+%% PLOTTING
+figures = plot(time,smoothforceNormal);
+xlabel('Time (s)');
+ylabel('Normal Force (N)');
+grid on;
+
+%% SAVING
+evalCase = 1;
+save(['Experiment_Result',num2str(evalCase),'.mat'],'time','smoothforceNormal');
+savefig(['Experiment_Result',num2str(evalCase),'.fig'],'figures');
+\end{lstlisting}
+
+\lstset{
+    language=C++,%
+    basicstyle=\ttfamily,
+    breaklines=true,%
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+    commentstyle=\color{green}\ttfamily,
+    morecomment=[l][\color{magenta}]{\#}
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+    %emph=[2]{word1,word2}, emphstyle=[2]{style},    
+}
+\begin{lstlisting}[caption={Code for traversing module in Arduino}]
+  /* Sweep
+  by BARRAGAN <http://barraganstudio.com>
+  This example code is in the public domain.
+
+  modified 8 Nov 2013
+  by Scott Fitzgerald
+  http://www.arduino.cc/en/Tutorial/Sweep
+
+  Modified 7 Jul 2018
+  by MI
+  change delay to millis()
+*/
+
+#include <Servo.h>
+#include <AccelStepper.h>
+
+Servo myServo;
+AccelStepper myStepper (1, 10, 11);
+
+const int servoMinDegrees = 75;
+const int servoMaxDegrees = 105;
+const int servoCenterDegree = 90;
+const int servoPin = 9;
+const int stepperPulsePin = 10;
+const int stepperDirPin = 11;
+
+float servoPosition = 90;
+/*
+ * Set frequency in servoInterval
+ * servoInterval = 8.325/desiredFrequency
+ */
+int servoInterval = 8;
+float servoDegrees = 1;
+
+unsigned long timeInit, timeFinal, timeElapsed;
+unsigned long currentMillis = 0;
+unsigned long previousServoMillis = 0;
+
+void setup() {
+  myServo.attach(servoPin);
+  myServo.write(servoPosition);
+  myStepper.setMaxSpeed(6000);
+
+  Serial.begin(9600);// rate at which the arduino communicates
+  Serial.println("TOWING TANK 2.0 MOTION MODULE");
+}
+
+void loop() {
+  /*
+   * Options: put 1, 2, or 3
+     1. Flapping forward (moving away from user)
+     2. Backward w/o flapping (moving toward user)
+     3. Centering
+  */
+  int option = 1;
+  if (option == 1) {
+    currentMillis = millis();
+    rotateStepperForward();
+    rotateServo();
+  }
+  else if (option == 2) {
+    rotateStepperBackward();
+  }
+  else if (option == 3) {
+    myServo.write(servoCenterDegree);
+  }
+}
+
+void rotateStepperForward() {
+  /*
+   * moveTo(8000) = 10 cm
+   * setSpeed(800) = 1 cm/s
+   */
+  if (myStepper.distanceToGo() == 0) {
+    myStepper.moveTo(8000);
+    myStepper.setSpeed(800);
+  }
+  myStepper.runSpeedToPosition();
+}
+
+void rotateStepperBackward() {
+  if (myStepper.distanceToGo() == 0) {
+    myStepper.moveTo(-8000);
+    myStepper.setSpeed(800);
+  }
+  myStepper.runSpeedToPosition();
+}
+
+void rotateServo() {
+  /*
+    This is similar to the servo sweep example except that it uses millis() rather than delay()
+    nothing happens unless the interval has expired
+    the value of currentMillis was set in loop()
+  */
+  if (currentMillis - previousServoMillis >= servoInterval) {
+    // its time for another move
+    previousServoMillis += servoInterval;
+
+    servoPosition = servoPosition + servoDegrees; // servoDegrees might be negative
+
+    if ((servoPosition >= servoMaxDegrees) || (servoPosition <= servoMinDegrees))  {
+      // if the servo is at either extreme change the sign of the degrees to make it move the other way
+      servoDegrees = - servoDegrees; // reverse direction
+      // and update the position to ensure it is within range
+      servoPosition = servoPosition + servoDegrees;
+    }
+    // make the servo move to the next position
+    myServo.write(servoPosition);
+
+    // and record the time when the move happened
+    Serial.println(myServo.read());
+  }
+  else if (currentMillis > 30000) {
+    myServo.write(servoCenterDegree);
+  }
+}
+//=====END
+\end{lstlisting}
